@@ -20,11 +20,17 @@ The following command will obtain and copy the Nexar token to the clipboard.
 
 `python print_token.py <CLIENT_ID> <CLIENT_SECRET>`
 
-
 ## Obtaining Nexar token with login
 The following command will obtain and copy the Nexar token with login to the clipboard.
 
 `python print_token_with_login.py <CLIENT_ID> <CLIENT_SECRET> <SCOPE_1> <SCOPE2> ...`
+
+where scopes include:
+- user.access
+- design.domain
+- supply.domain
+
+e.g. `python print_token_with_login.py <CLIENT_ID> <CLIENT_SECRET> user.access design.domain supply.domain`
 
 When the following message is displayed: `Please authorize access and enter the redirect URL:`
 the user needs to introduce the new URL that appears in the new open window.
