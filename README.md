@@ -15,15 +15,20 @@ After adding the submodule/subtree it can be implemented as follows:
 
 `from nexar_module.nexar_token import get_token`
 
-## Obtaining Nexar token and printing to the standard output
-The following command will print the Nexar token to the standard output.
+## Obtaining Nexar token
+The following command will obtain and copy the Nexar token to the clipboard.
 
-You can copy it to the clipboard adding `| Set-Clipboard` for PowerShell, `| xclip -sel clip` for Bash, or `| clip.exe` for Ubuntu in WSL.
+`python print_token.py <CLIENT_ID> <CLIENT_SECRET>`
 
-```
-python print_token.py <CLIENT_ID> <CLIENT_SECRET>
-python print_token.py <CLIENT_ID> <CLIENT_SECRET> | Set-Clipboard
-```
+
+## Obtaining Nexar token with login
+The following command will obtain and copy the Nexar token with login to the clipboard.
+
+`python print_token_with_login.py <CLIENT_ID> <CLIENT_SECRET> <SCOPE_1> <SCOPE2> ...`
+
+When the following message is displayed: `Please authorize access and enter the redirect URL:`
+the user needs to introduce the new URL that appears in the new open window.
+This redirect URL starts with: `http://localhost:3000...`
 
 ## Sample request for extracting GraphQL part data
 `python sample_request.py <CLIENT_ID> <CLIENT_SECRET> <MPN>`
