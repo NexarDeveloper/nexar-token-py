@@ -87,7 +87,7 @@ def get_token_with_login(client_id, client_secret, scope):
         token = requests.post(
             url=PROD_TOKEN_URL,
             data={
-                "grant_type": "client_credentials",
+                "grant_type": "authorization_code",
                 "client_id": client_id,
                 "client_secret": client_secret,
                 "redirect_uri": redirect_response,
