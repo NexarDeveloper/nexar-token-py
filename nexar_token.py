@@ -48,7 +48,7 @@ def get_token_with_login(client_id, client_secret, scope):
         raise Exception("scope is empty")
 
     token = {}
-    scope_list = ["openid", "profile", "email", "user.details"] + scope
+    scope_list = ["openid", "profile", "email"] + scope
 
     # Start the local service
     server = Process(target=main)
@@ -87,10 +87,10 @@ def get_token_with_login(client_id, client_secret, scope):
         token = requests.post(
             url=PROD_TOKEN_URL,
             data={
-                "grant_type": "client_credentials",
+                "grant_type": "authorization_code",
                 "client_id": client_id,
                 "client_secret": client_secret,
-                "redirect_uri": redirect_response,
+                "redirect_uri": REDIRECT_URI,
                 "code": auth_code,
                 "code_verifier": code_verifier,
             },
