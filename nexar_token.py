@@ -7,6 +7,7 @@ import webbrowser
 from multiprocessing import Process
 from urllib.parse import parse_qs, urlparse
 
+import time
 import requests
 from oauthlib.oauth2 import BackendApplicationClient
 from oauthlib.oauth2.rfc6749.errors import MissingTokenError
@@ -14,9 +15,9 @@ from requests_oauthlib import OAuth2Session
 
 from local_service import main
 
-PROD_TOKEN_URL = "https://identity.nexar.com/connect/token"
 REDIRECT_URI = "http://localhost:3000/login"
 AUTHORITY_URL = "https://identity.nexar.com/connect/authorize"
+PROD_TOKEN_URL = "https://identity.nexar.com/connect/token"
 
 
 def get_token(client_id, client_secret):
@@ -72,18 +73,19 @@ def get_token_with_login(client_id, client_secret, scope):
             code_challenge_method="S256",
         )
         authorization_url = authorization_url.replace("+", "%20")
+        webbrowser.open_new(authorization_url)
 
         # Obtain redirect response
-        webbrowser.open_new(authorization_url)
-        redirect_response = input(
-            "\nPlease authorize access and enter the redirect URL: "
-        ).strip()
+        # TODO verify state from redirect
+        # auth_state = parse_qs(urlparse(authorization_url).query)["state"][0]
+        auth_code = ""
+        while (auth_code == ""):
+            time.sleep(0.25)
+            auth_code = requests.get(url="http://localhost:3000/authcode").text
 
         # Terminate the local service because no longer needed
         server.terminate()
 
-        redirect_params = parse_qs(urlparse(redirect_response).query)
-        auth_code = redirect_params["code"][0]
         token = requests.post(
             url=PROD_TOKEN_URL,
             data={

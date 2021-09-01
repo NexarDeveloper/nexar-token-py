@@ -3,12 +3,12 @@ from flask import Flask, make_response, request
 from waitress import serve
 
 app = Flask(__name__)
+code = ""
 
-
-PROD_TOKEN_URL = "https://identity.nexar.com/connect/token"
 PORT = 3000
 REDIRECT_URI = "http://localhost:3000/login"
 AUTHORITY_URL = "https://identity.nexar.com/connect/authorize"
+PROD_TOKEN_URL = "https://identity.nexar.com/connect/token"
 HTML_400 = "<h1>Invalid request.</h1>"
 HTML_200 = """
 <html>
@@ -54,11 +54,17 @@ HTML_200 = """
 @app.route("/login", methods=["GET"])
 def login():
     """Show login page."""
+    global code
     if request.args is None:
+        code = "invalid"
         return make_response(HTML_400, 400)
     else:
+        code = request.args.get("code")
         return make_response(HTML_200, 200)
 
+@app.route("/authcode", methods=["GET"])
+def authcode():
+  return code
 
 def main():
     """Start the service."""
