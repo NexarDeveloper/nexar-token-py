@@ -1,10 +1,8 @@
 """Main entry point to the service."""
-from flask import Flask, make_response, request
-from waitress import serve
+import http.server
+from urllib.parse import parse_qs, urlparse
 
-app = Flask(__name__)
-code = ""
-
+HOST_NAME = "localhost"
 PORT = 3000
 REDIRECT_URI = "http://localhost:3000/login"
 AUTHORITY_URL = "https://identity.nexar.com/connect/authorize"
@@ -50,22 +48,43 @@ HTML_200 = """
 </html>
 """
 
+def handlerFactory(code):
+    class MyHandler(http.server.BaseHTTPRequestHandler):
+        def log_request(code='-', size='-'):
+            pass
+        def do_HEAD(s):
+            s.send_response(200)
+            s.send_header("Content-type", "text/html")
+            s.end_headers()
+        def do_GET(s):
+            """Respond to a GET request."""
+            o = urlparse(s.path)
+            response = parse_qs(o.query)
 
-@app.route("/login", methods=["GET"])
-def login():
-    """Show login page."""
-    global code
-    if request.args is None:
-        code = "invalid"
-        return make_response(HTML_400, 400)
-    else:
-        code = request.args.get("code")
-        return make_response(HTML_200, 200)
+            if (o.path != "/login"): return
 
-@app.route("/authcode", methods=["GET"])
-def authcode():
-  return code
+            if ("code" not in response):
+                s.send_response(400)
+                s.send_header("Content-type", "text/html")
+                s.end_headers()
+                s.wfile.write(HTML_400.encode())
+                code.append("invalid")
+                return
 
-def main():
-    """Start the service."""
-    return serve(app, host="localhost", port=PORT)
+            s.send_response(200)
+            s.send_header("Content-type", "text/html")
+            s.end_headers()
+            s.wfile.write(HTML_200.encode())
+            code.append(response["code"][0])
+    return MyHandler
+
+def run(q):
+    code = []
+    server_class = http.server.HTTPServer
+    httpd = server_class((HOST_NAME, PORT), handlerFactory(code))
+
+    while (len(code) == 0):
+        httpd.handle_request()
+
+    q.put(code[0])
+    httpd.server_close()
