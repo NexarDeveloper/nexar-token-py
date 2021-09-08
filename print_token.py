@@ -13,4 +13,4 @@ if __name__ == '__main__':
 
     token = get_token(args.client_id, args.client_secret)["access_token"]
     pyperclip.copy(token)
-    print("\nYour token has been copied to the clipboard")
+    print("Your token has been copied to the clipboard")
