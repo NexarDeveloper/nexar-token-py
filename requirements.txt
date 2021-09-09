@@ -1,4 +1,2 @@
 requests_oauthlib
-flask
 pyperclip
-waitress

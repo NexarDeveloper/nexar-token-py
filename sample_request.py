@@ -1,10 +1,8 @@
 """Sample request for extracting GraphQL part data."""
 import argparse
 import json
-
 import requests
-
-from nexar_token import get_token
+import pyperclip
 
 NEXAR_URL = "https://api.nexar.com/graphql"
 QUERY_MPN = """query ($mpn: String!) {
@@ -39,7 +37,6 @@ QUERY_MPN = """query ($mpn: String!) {
     }
 """
 
-
 def get_part_info_from_mpn(variables, token) -> dict:
     """Return Nexar response for the given mpn."""
     try:
@@ -57,12 +54,10 @@ def get_part_info_from_mpn(variables, token) -> dict:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("client_id", help="The client ID.", type=str)
-    parser.add_argument("client_secret", help="The client secret.", type=str)
     parser.add_argument("mpn", help="The mpn for the part request.", type=str)
     args = parser.parse_args()
 
+    token = pyperclip.paste()
     variables = {"mpn": args.mpn}
-    token = get_token(args.client_id, args.client_secret)
-    response = get_part_info_from_mpn(variables, token["access_token"])
-    print(response)
+    response = get_part_info_from_mpn(variables, token)
+    print(json.dumps(response, indent = 1))

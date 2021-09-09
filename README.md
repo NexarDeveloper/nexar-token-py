@@ -30,14 +30,22 @@ where scopes include:
 - design.domain
 - supply.domain
 
-e.g. `python print_token_with_login.py <CLIENT_ID> <CLIENT_SECRET> user.access design.domain supply.domain`
+If no scopes are given then these three scopes will be used by default
 
-When the following message is displayed: `Please authorize access and enter the redirect URL:`
-the user needs to introduce the new URL that appears in the new open window.
-This redirect URL starts with: `http://localhost:3000...`
+
+e.g. `python print_token_with_login.py <CLIENT_ID> <CLIENT_SECRET>`
+
+The login will open a browser tab asking for the login credentials and then display a page
+indicating whether the given credentials are vaild.  This tab may then be closed while the
+token is generated and copied to the clipboard.
+
 
 ## Sample request for extracting GraphQL part data
-`python sample_request.py <CLIENT_ID> <CLIENT_SECRET> <MPN>`
+With the token copied to the clipboard, the sample_request can be run to query the Nexar API
+`python sample_request.py <MPN>`
+
+Please note that any changes to the clipboard will require the token to be re-copied before
+running the sample request.
 
 
 ## Extra info

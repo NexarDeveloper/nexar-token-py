@@ -4,19 +4,19 @@ import hashlib
 import os
 import re
 import webbrowser
-from multiprocessing import Process
-from urllib.parse import parse_qs, urlparse
-
 import requests
+import http.server
+
+from local_service import handlerFactory
 from oauthlib.oauth2 import BackendApplicationClient
 from oauthlib.oauth2.rfc6749.errors import MissingTokenError
 from requests_oauthlib import OAuth2Session
 
-from local_service import main
-
-PROD_TOKEN_URL = "https://identity.nexar.com/connect/token"
+HOST_NAME = "localhost"
+PORT = 3000
 REDIRECT_URI = "http://localhost:3000/login"
 AUTHORITY_URL = "https://identity.nexar.com/connect/authorize"
+PROD_TOKEN_URL = "https://identity.nexar.com/connect/token"
 
 
 def get_token(client_id, client_secret):
@@ -50,11 +50,6 @@ def get_token_with_login(client_id, client_secret, scope):
     token = {}
     scope_list = ["openid", "profile", "email"] + scope
 
-    # Start the local service
-    server = Process(target=main)
-    server.daemon = True
-    server.start()
-
     # PCKE code verifier and challenge
     code_verifier = base64.urlsafe_b64encode(os.urandom(40)).decode("utf-8")
     code_verifier = re.sub("[^a-zA-Z0-9]+", "", code_verifier)
@@ -63,27 +58,29 @@ def get_token_with_login(client_id, client_secret, scope):
     code_challenge = base64.urlsafe_b64encode(code_challenge).decode("utf-8")
     code_challenge = code_challenge.replace("=", "")
 
+    oauth = OAuth2Session(client_id, redirect_uri=REDIRECT_URI, scope=scope_list)
+    authorization_url, _ = oauth.authorization_url(
+        url=AUTHORITY_URL,
+        code_challenge=code_challenge,
+        code_challenge_method="S256",
+    )
+    authorization_url = authorization_url.replace("+", "%20")
+
     try:
+        # Start the local service
+        code = []
+        httpd = http.server.HTTPServer((HOST_NAME, PORT), handlerFactory(code))
+
         # Request login page
-        oauth = OAuth2Session(client_id, redirect_uri=REDIRECT_URI, scope=scope_list)
-        authorization_url, _ = oauth.authorization_url(
-            url=AUTHORITY_URL,
-            code_challenge=code_challenge,
-            code_challenge_method="S256",
-        )
-        authorization_url = authorization_url.replace("+", "%20")
-
-        # Obtain redirect response
         webbrowser.open_new(authorization_url)
-        redirect_response = input(
-            "\nPlease authorize access and enter the redirect URL: "
-        ).strip()
 
-        # Terminate the local service because no longer needed
-        server.terminate()
+        while (len(code) == 0):
+            httpd.handle_request()
 
-        redirect_params = parse_qs(urlparse(redirect_response).query)
-        auth_code = redirect_params["code"][0]
+        httpd.server_close()
+        auth_code = code[0]
+
+        # Exchange code for token
         token = requests.post(
             url=PROD_TOKEN_URL,
             data={

@@ -1,14 +1,7 @@
 """Main entry point to the service."""
-from flask import Flask, make_response, request
-from waitress import serve
+from http.server import BaseHTTPRequestHandler
+from urllib.parse import parse_qs, urlparse
 
-app = Flask(__name__)
-
-
-PROD_TOKEN_URL = "https://identity.nexar.com/connect/token"
-PORT = 3000
-REDIRECT_URI = "http://localhost:3000/login"
-AUTHORITY_URL = "https://identity.nexar.com/connect/authorize"
 HTML_400 = "<h1>Invalid request.</h1>"
 HTML_200 = """
 <html>
@@ -51,15 +44,35 @@ HTML_200 = """
 """
 
 
-@app.route("/login", methods=["GET"])
-def login():
-    """Show login page."""
-    if request.args is None:
-        return make_response(HTML_400, 400)
-    else:
-        return make_response(HTML_200, 200)
+def handlerFactory(code):
+    class MyHandler(BaseHTTPRequestHandler):
+        def log_request(code='-', size='-'):
+            pass
 
+        def do_HEAD(s):
+            s.send_response(200)
+            s.send_header("Content-type", "text/html")
+            s.end_headers()
 
-def main():
-    """Start the service."""
-    return serve(app, host="localhost", port=PORT)
+        def do_GET(s):
+            """Respond to a GET request."""
+            o = urlparse(s.path)
+            response = parse_qs(o.query)
+
+            if (o.path != "/login"):
+                return
+
+            if ("code" not in response):
+                s.send_response(400)
+                s.send_header("Content-type", "text/html")
+                s.end_headers()
+                s.wfile.write(HTML_400.encode())
+                code.append("invalid")
+                return
+
+            s.send_response(200)
+            s.send_header("Content-type", "text/html")
+            s.end_headers()
+            s.wfile.write(HTML_200.encode())
+            code.append(response["code"][0])
+    return MyHandler
