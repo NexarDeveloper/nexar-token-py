@@ -18,11 +18,14 @@ REDIRECT_URI = "http://localhost:3000/login"
 AUTHORITY_URL = "https://identity.nexar.com/connect/authorize"
 PROD_TOKEN_URL = "https://identity.nexar.com/connect/token"
 
-
-def get_token(client_id, client_secret):
+def get_token(client_id, client_secret, scopes):
     """Return the Nexar token from the client_id and client_secret provided."""
     if not client_id or not client_secret:
         raise Exception("client_id and/or client_secret are empty")
+    if not scopes:
+        raise Exception("scope is empty")
+    if (scopes != ["supply.domain"]):
+        return get_token_with_login(client_id, client_secret, scopes)
 
     client = BackendApplicationClient(client_id=client_id)
     oauth = OAuth2Session(client=client)
@@ -40,15 +43,15 @@ def get_token(client_id, client_secret):
     return token
 
 
-def get_token_with_login(client_id, client_secret, scope):
+def get_token_with_login(client_id, client_secret, scopes):
     """Open the Nexar authorization url from the client_id and scope provided."""
     if not client_id or not client_secret:
         raise Exception("client_id and/or client_secret are empty")
-    if not scope:
+    if not scopes:
         raise Exception("scope is empty")
 
     token = {}
-    scope_list = ["openid", "profile", "email"] + scope
+    scope_list = ["openid", "profile", "email"] + scopes
 
     # PCKE code verifier and challenge
     code_verifier = base64.urlsafe_b64encode(os.urandom(40)).decode("utf-8")
@@ -93,6 +96,7 @@ def get_token_with_login(client_id, client_secret, scope):
             },
             allow_redirects=False,
         ).json()
+
     except Exception:
         raise
 

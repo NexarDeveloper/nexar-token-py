@@ -43,7 +43,6 @@ HTML_200 = """
 </html>
 """
 
-
 def handlerFactory(code):
     class MyHandler(BaseHTTPRequestHandler):
         def log_request(code='-', size='-'):
@@ -53,15 +52,14 @@ def handlerFactory(code):
             s.send_response(200)
             s.send_header("Content-type", "text/html")
             s.end_headers()
-
+            
         def do_GET(s):
             """Respond to a GET request."""
             o = urlparse(s.path)
-            response = parse_qs(o.query)
-
             if (o.path != "/login"):
                 return
 
+            response = parse_qs(o.query)
             if ("code" not in response):
                 s.send_response(400)
                 s.send_header("Content-type", "text/html")
@@ -75,4 +73,5 @@ def handlerFactory(code):
             s.end_headers()
             s.wfile.write(HTML_200.encode())
             code.append(response["code"][0])
+
     return MyHandler

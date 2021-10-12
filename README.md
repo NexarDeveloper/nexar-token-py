@@ -16,37 +16,18 @@ After adding the submodule/subtree it can be implemented as follows:
 `from nexar_module.nexar_token import get_token`
 
 ## Obtaining Nexar token
-The following command will obtain and copy the Nexar token to the clipboard.
+The following command will obtain and print the Nexar token.
 
-`python print_token.py <CLIENT_ID> <CLIENT_SECRET>`
-
-## Obtaining Nexar token with login
-The following command will obtain and copy the Nexar token with login to the clipboard.
-
-`python print_token_with_login.py <CLIENT_ID> <CLIENT_SECRET> <SCOPE_1> <SCOPE2> ...`
+`python print_token.py <CLIENT_ID> <CLIENT_SECRET> <SCOPE_1> <SCOPE2> ...`
 
 where scopes include:
 - user.access
 - design.domain
 - supply.domain
 
-If no scopes are given then these three scopes will be used by default
-
-
-e.g. `python print_token_with_login.py <CLIENT_ID> <CLIENT_SECRET>`
-
-The login will open a browser tab asking for the login credentials and then display a page
-indicating whether the given credentials are vaild.  This tab may then be closed while the
-token is generated and copied to the clipboard.
-
-
-## Sample request for extracting GraphQL part data
-With the token copied to the clipboard, the sample_request can be run to query the Nexar API
-`python sample_request.py <MPN>`
-
-Please note that any changes to the clipboard will require the token to be re-copied before
-running the sample request.
-
+If any scopes other than supply.domain are requested the login will open a browser tab 
+asking for the user credentials and then display a page indicating whether the given
+credentials are vaild.  This tab may then be closed while the token is generated.
 
 ## Extra info
 Some information and examples of the package used:
