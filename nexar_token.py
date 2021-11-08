@@ -6,6 +6,7 @@ import re
 import webbrowser
 import requests
 import http.server
+import getpass
 
 from local_service import handlerFactory
 from oauthlib.oauth2 import BackendApplicationClient
@@ -95,6 +96,32 @@ def get_token_with_login(client_id, client_secret, scopes):
                 "code_verifier": code_verifier,
             },
             allow_redirects=False,
+        ).json()
+
+    except Exception:
+        raise
+
+    return token
+
+def get_token_with_resource_password(client_id, client_secret):
+    """Open the Nexar authorization url from the client_id and scope provided."""
+    if not client_id or not client_secret:
+        raise Exception("client_id and/or client_secret are empty")
+
+    username = input("Enter username: ")
+    password = getpass.getpass("Enter password: ")
+
+    token = {}
+    try:
+        token = requests.post(
+            url=PROD_TOKEN_URL,
+            data={
+                "grant_type": "password",
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "username": username,
+                "password": password,
+            },
         ).json()
 
     except Exception:
