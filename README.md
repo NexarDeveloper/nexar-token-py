@@ -1,6 +1,8 @@
 # nexar-token-py
 Getting Nexar tokens for Python.
 
+[UPDATE] Please note for those users who want to get going with the supply API, we recommend following the examples [here](https://github.com/NexarDeveloper/nexar-first-supply-query) which support multiple languages and include token caching.
+
 
 ## Installing the python packages:
 Using the virtual environment manager of your choice (venv, conda, etc.), install the python packages:
